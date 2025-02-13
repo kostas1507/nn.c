@@ -8,7 +8,7 @@ The network uses the softsign activation function and mean squared error (MSE) l
 
 It has a fixed architecture: two inputs, one hidden layer with two neurons, and one output. It can learn logic gates.
 
-Because everything is static and the network is very small, gradients can be pre-computed, so backpropagation does not need to be implemented.
+Because everything is static and the network is very small, gradient calculation functions can be pre-computed, so backpropagation does not need to be implemented.
 
 **Note:** This project will not be very helpful if you have no idea how neural networks work. For that you should checkout [Karpathy's video](https://www.youtube.com/watch?v=VMj-3S1tku0&t=6918s).
 
