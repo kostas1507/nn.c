@@ -4,16 +4,16 @@ simplest implementation of
 */
 #include <stdio.h>
 
-float I [2]; //INPUTS
-float H [2]; //HIDDEN LAYER NEURONS BEFORE ACTIVATION
-float HS [2]; //HIDDEN LAYER NEURONS
-float O [1]; //OUTPUT NEURON BEFORE ACTIVATION
-float OS [1]; //OUTPUT NEURON
-float L [1]; //LOSS
-float WH [4]; //HIDDEN LAYER WEIGHTS {I1->H1, I2->H2, I1->H1, I2->H2}
-float WO [2]; //OUTPUT LAYER WEIGHTS
-float BH [2]; //HIDDEN LAYER BIASES
-float BO [1]; //OUTPUT LAYER BIAS
+float I [2]; //inputs
+float H [2]; //hidden layer neurons before activation
+float HS [2]; //hidden layer neurons
+float O [1]; //output neuron before activation
+float OS [1]; //output neuron 
+float L [1]; //loss
+float WH [4]; //hidden layer weights {I1->H1, I2->H2, I1->H1, I2->H2}
+float WO [2]; //output layer weights
+float BH [2]; //hidden layer weights
+float BO [1]; //output layer bias
 
 
 const float SAMPLE [4][3] = {{0,0,0}, {0,1,1}, {1,0,1}, {1,1,0}}; //XOR {in0, in1, out0}
