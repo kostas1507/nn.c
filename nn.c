@@ -1,7 +1,3 @@
-/*
-simplest implementation of
-2 inputs, 1 hidden layer with 2 neurons, 1 output
-*/
 #include <stdio.h>
 
 float I [2]; //inputs
