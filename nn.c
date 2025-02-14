@@ -12,29 +12,34 @@ float BH [2]; //hidden layer biases
 float BO [1]; //output layer bias
 
 
-const float SAMPLE [4][3] = {{0,0,0}, {0,1,1}, {1,0,1}, {1,1,0}}; //XOR {in0, in1, out0}
+//samples and tests in {in0, in1, out0} format
+const float BATCH1 [][3] = {{0,0,0}, {1,0,1}};
+const float BATCH2 [][3] = {{1,1,0}, {0,1,1}};
+const float TEST [][3] = {{0,0,0}, {0,1,1}, {1,0,1}, {1,1,0}};
 
 
 void init_weights(unsigned int seed); //initial values between -1.4 and 1.4 (xavier/glorot) 
 void forward();
+void learn(const float batch[][3], int size, float rate); //run a single epoch and update weights
+void test_current_state(const float [][3], int size);
+
 void loss(float x){L[0] = (OS[0] -x)*(OS[0] -x);}
-void learn(const float batch[4][3], float rate); //run a single epoch and update weights
-void print_current_state();
 float softsign(float x){return 0.5 * (x / (1 + (x>0 ? x : -x)) + 1);} //shifted and scaled
-float softsign_der(float x){return 0.5 / ((1 + (x>0 ? x : -x))*(1 + (x>0 ? x : -x)));} 
+float softsign_der(float x){return 0.5 / ((1 + (x>0 ? x : -x)) * (1 + (x>0 ? x : -x)));} 
 
 
 
 int main(){
   init_weights(42);
   
-  //run 10,000 epochs
+  //run 10_000 epochs
   for (int i = 0; i<10000; ++i){
-    /* print_current_state(); */
+    //test_current_state(); 
     //run one epoch, batch whole sample
-    learn(SAMPLE, 0.1);
+    learn(BATCH1, sizeof(BATCH1)/sizeof(BATCH1[0]),  0.1);
+    learn(BATCH2, sizeof(BATCH2)/sizeof(BATCH2[0]),  0.1);
   }
-  print_current_state();
+  test_current_state(TEST, sizeof(TEST)/sizeof(TEST[0]));
 
 }
 
@@ -47,25 +52,25 @@ void forward(){
   OS[0] = softsign(O[0]);
 }
 
-void learn(const float batch[4][3], float rate){
+void learn(const float batch[][3], int size, float rate){
   //average gradients of weights and biases
   float GBO [1] = {0}, GWO [2] = {0}, GBH [2] = {0}, GWH [4] = {0};
 
   //run gradient calculations (hardcoded equations, derived by hand)
-  for (int i = 0; i<4; ++i){
+  for (int i = 0; i<size; ++i){
     I[0] = batch[i][0]; I[1] = batch[i][1];
     forward();
     loss(batch[i][2]);
 
     GBO[0] += 2*(OS[0] - batch[i][2])*softsign_der(O[0]);
     for(int j = 0; j<2; ++j)
-      GWO[j] += HS[j] * 2*(OS[0] - batch[i][2])*softsign_der(O[0]) /4;
+      GWO[j] += HS[j] * 2 * (OS[0] - batch[i][2]) * softsign_der(O[0]) /size;
     for(int j = 0; j<2; ++j)
-      GBH[j] += softsign_der(H[j]) * WO[j] * 2* (OS[0] - batch[i][2]) * softsign_der(O[0]) /4;
+      GBH[j] += softsign_der(H[j]) * WO[j] * 2 * (OS[0] - batch[i][2]) * softsign_der(O[0]) /size;
     for(int j = 0; j<2; ++j)
-      GWH[j] +=  softsign_der(H[0]) * WO[0] * 2* (OS[0] - batch[i][2]) * softsign_der(O[0]) * I[j] /4;
+      GWH[j] +=  softsign_der(H[0]) * WO[0] * 2 * (OS[0] - batch[i][2]) * softsign_der(O[0]) * I[j] /size;
     for(int j = 0; j<2; ++j)
-      GWH[j+2] += softsign_der(H[1]) * WO[1] * 2* (OS[0] - batch[i][2]) * softsign_der(O[0]) * I[j] /4;
+      GWH[j+2] += softsign_der(H[1]) * WO[1] * 2 * (OS[0] - batch[i][2]) * softsign_der(O[0]) * I[j] /size;
   }
 
   //update weights and biases
@@ -93,17 +98,19 @@ void init_weights(unsigned int seed){
   BO[0] = *(++rand_f_it);
 }
 
-void print_current_state(){
-    float agg_loss = 0; //aggregate loss
-    float outputs [4];
-    for(int j = 0; j<4; ++j){
-      I[0] = SAMPLE[j][0]; I[1] = SAMPLE[j][1];
-      forward();
-      loss(SAMPLE[j][2]);
-      agg_loss += L[0];
-      outputs[j] = OS[0];
-    }
-    printf("EXPECTED: {%f, %f, %f, %f}, PREDICTED: {%f, %f, %f, %f}, LOSS: %.10f\n",
-        SAMPLE[0][2], SAMPLE[1][2], SAMPLE[2][2], SAMPLE[3][2],
-        outputs[0], outputs[1], outputs[2], outputs[3], agg_loss/4);
- }
+void test_current_state(const float test[][3], int size){
+  float agg_loss = 0; //aggregate loss
+  printf("EXPECTED: {%f", test[0][2]);
+  for(int i = 1; i<size; ++i)
+    printf(", %f", test[i][2]);
+
+  I[0] = test[0][0]; I[1] = test[0][1];
+  forward(); loss(test[0][2]); agg_loss += L[0];
+  printf("}, PREDICTED: {%f", OS[0]);
+  for(int i = 1; i<size; ++i){
+    I[0] = test[i][0]; I[1] = test[i][1];
+    forward(); loss(test[i][2]); agg_loss += L[0];
+    printf(", %f", OS[0]);
+  }
+  printf("}, LOSS: %.10f\n", agg_loss/size);
+}
