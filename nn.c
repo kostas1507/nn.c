@@ -6,7 +6,7 @@ float HS [2]; //hidden layer neurons
 float O [1]; //output neuron before activation
 float OS [1]; //output neuron 
 float L [1]; //loss
-float WH [4]; //hidden layer weights {I1->H1, I2->H2, I1->H1, I2->H2}
+float WH [4]; //hidden layer weights {I1->H1, I2->H1, I1->H2, I2->H2}
 float WO [2]; //output layer weights
 float BH [2]; //hidden layer biases
 float BO [1]; //output layer bias
