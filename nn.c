@@ -1,18 +1,17 @@
 #include <stdio.h>
 
-float I [2]; //inputs
-float H [2]; //hidden layer neurons before activation
-float HS [2]; //hidden layer neurons
-float O [1]; //output neuron before activation
-float OS [1]; //output neuron 
-float L [1]; //loss
+float I  [2]; //inputs
+float H  [2], HS [2]; //hidden layer neurons before and after activation
+float O  [1], OS [1]; //output neuron before and after activation 
 float WH [4]; //hidden layer weights {I1->H1, I2->H1, I1->H2, I2->H2}
 float WO [2]; //output layer weights
-float BH [2]; //hidden layer biases
-float BO [1]; //output layer bias
+float BH [2], BO [1]; //hidden and output output layer biases
+float L  [1]; //loss
 
 
 //samples and tests in {in0, in1, out0} format
+//const float BATCH1 [][3] = {{0,0,0}, {1,0,1}};
+//const float BATCH2 [][3] = {{1,1,0}, {0,1,1}};
 const float BATCH1 [][3] = {{0,0,0}, {1,0,1}};
 const float BATCH2 [][3] = {{1,1,0}, {0,1,1}};
 const float TEST [][3] = {{0,0,0}, {0,1,1}, {1,0,1}, {1,1,0}};
@@ -22,8 +21,8 @@ void init_weights(unsigned int seed); //initial values between -1.4 and 1.4 (xav
 void forward();
 void learn(const float batch[][3], int size, float rate); //run a single epoch and update weights
 void test_current_state(const float [][3], int size);
+void loss(float x){L[0] = (OS[0] - x)*(OS[0] - x);} //update loss value based on expected value x
 
-void loss(float x){L[0] = (OS[0] -x)*(OS[0] -x);}
 float softsign(float x){return 0.5 * (x / (1 + (x>0 ? x : -x)) + 1);} //shifted and scaled
 float softsign_der(float x){return 0.5 / ((1 + (x>0 ? x : -x)) * (1 + (x>0 ? x : -x)));} 
 
@@ -34,7 +33,7 @@ int main(){
   
   //run 10_000 epochs
   for (int i = 0; i<10000; ++i){
-    //test_current_state(); 
+    /*test_current_state();*/
     //run one epoch, batch whole sample
     learn(BATCH1, sizeof(BATCH1)/sizeof(BATCH1[0]),  0.1);
     learn(BATCH2, sizeof(BATCH2)/sizeof(BATCH2[0]),  0.1);
@@ -116,5 +115,5 @@ void test_current_state(const float test[][3], int size){
     forward(); loss(test[i][2]); agg_loss += L[0];
     printf(", %f", OS[0]);
   }
-  printf("}, LOSS: %.10f\n", agg_loss/size);
+  printf("}, LOSS(MSE): %.10f\n", agg_loss/size);
 }
