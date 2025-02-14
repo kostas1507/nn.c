@@ -62,25 +62,29 @@ void learn(const float batch[][3], int size, float rate){
     forward();
     loss(batch[i][2]);
 
-    GBO[0] += 2*(OS[0] - batch[i][2])*softsign_der(O[0]);
-    for(int j = 0; j<2; ++j)
-      GWO[j] += HS[j] * 2 * (OS[0] - batch[i][2]) * softsign_der(O[0]) /size;
-    for(int j = 0; j<2; ++j)
-      GBH[j] += softsign_der(H[j]) * WO[j] * 2 * (OS[0] - batch[i][2]) * softsign_der(O[0]) /size;
-    for(int j = 0; j<2; ++j)
-      GWH[j] +=  softsign_der(H[0]) * WO[0] * 2 * (OS[0] - batch[i][2]) * softsign_der(O[0]) * I[j] /size;
-    for(int j = 0; j<2; ++j)
-      GWH[j+2] += softsign_der(H[1]) * WO[1] * 2 * (OS[0] - batch[i][2]) * softsign_der(O[0]) * I[j] /size;
+    //compute output bias gradient
+    GBO[0] += 2 * (OS[0] - batch[i][2]) * softsign_der(O[0]);
+    //compute output layer weight gradients
+    GWO[0] += HS[0] * 2 * (OS[0] - batch[i][2]) * softsign_der(O[0]) /size;
+    GWO[1] += HS[1] * 2 * (OS[0] - batch[i][2]) * softsign_der(O[0]) /size;
+    //compute hidden layer bias gradients
+    GBH[0] += softsign_der(H[0]) * WO[0] * 2 * (OS[0] - batch[i][2]) * softsign_der(O[0]) /size;
+    GBH[1] += softsign_der(H[1]) * WO[1] * 2 * (OS[0] - batch[i][2]) * softsign_der(O[0]) /size;
+    //compute hidden layer weight gradients
+    GWH[0] += softsign_der(H[0]) * WO[0] * 2 * (OS[0] - batch[i][2]) * softsign_der(O[0]) * I[0] /size;
+    GWH[1] += softsign_der(H[0]) * WO[0] * 2 * (OS[0] - batch[i][2]) * softsign_der(O[0]) * I[1] /size;
+    GWH[2] += softsign_der(H[1]) * WO[1] * 2 * (OS[0] - batch[i][2]) * softsign_der(O[0]) * I[0] /size;
+    GWH[3] += softsign_der(H[1]) * WO[1] * 2 * (OS[0] - batch[i][2]) * softsign_der(O[0]) * I[1] /size;
   }
 
-  //update weights and biases
+  //update output layer bias
   BO[0] -= rate * GBO[0];
-  for(int j = 0; j<2; ++j)
-    WO[j] -= rate * GWO[j];
-  for(int j = 0; j<2; ++j)
-    BH[j] -= rate * GBH[j];
-  for(int j = 0; j<4; ++j)
-    WH[j] -= rate * GWH[j];
+  //update output layer weights
+  WO[0] -= rate * GWO[0]; WO[1] -= rate * GWO[1];
+  //update hidden layer biases
+  BH[0] -= rate * GBH[0]; BH[1] -= rate * GBH[1];
+  //update hidden layer weights
+  WH[0] -= rate * GWH[0]; WH[1] -= rate * GWH[1]; WH[2] -= rate * GWH[2]; WH[3] -= rate * GWH[3];
 
 }
 
