@@ -10,8 +10,6 @@ float L  [1]; //loss
 
 
 //samples and tests in {in0, in1, out0} format
-//const float BATCH1 [][3] = {{0,0,0}, {1,0,1}};
-//const float BATCH2 [][3] = {{1,1,0}, {0,1,1}};
 const float BATCH1 [][3] = {{0,0,0}, {1,0,1}};
 const float BATCH2 [][3] = {{1,1,0}, {0,1,1}};
 const float TEST [][3] = {{0,0,0}, {0,1,1}, {1,0,1}, {1,1,0}};
